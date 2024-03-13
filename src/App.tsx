@@ -59,7 +59,7 @@ const App = () => {
         />
       )}
       {!fetched && password == "saborcito" && <button onClick={fetchData}>Summon Thor's Insights</button>}
-      {Object.entries(datos).map(([dia, eventos]) => (
+      {Object.entries(datos).sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([dia, eventos]) => (
         <div key={dia}>
           <h2>{dia}</h2>
           {eventos.map((evento) => (
