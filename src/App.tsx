@@ -19,7 +19,6 @@ const userNames = {
   "868627769465139312": "Jorge",
 };
 
-// Organizar los eventos por fecha
 const organizarEventosPorFecha = (eventos: Evento[]) => {
   return eventos.reduce((acc, evento) => {
     const fecha = new Date(evento.timestamp).toLocaleDateString();
@@ -27,7 +26,6 @@ const organizarEventosPorFecha = (eventos: Evento[]) => {
       acc[fecha] = [];
     }
     acc[fecha].push(evento);
-    // Ordenar los eventos de cada día por la hora
     acc[fecha].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     return acc;
   }, {} as Record<string, Evento[]>);
@@ -35,6 +33,7 @@ const organizarEventosPorFecha = (eventos: Evento[]) => {
 
 const App = () => {
   const [datos, setDatos] = useState<Record<string, Evento[]>>({});
+  const [fechasOrdenadas, setFechasOrdenadas] = useState<string[]>([]);
   const [fetched, setFetched] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -43,13 +42,28 @@ const App = () => {
     const eventos = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Evento[];
     const datosPorFecha = organizarEventosPorFecha(eventos);
     setDatos(datosPorFecha);
+    // Aquí ordenamos las fechas luego de organizar los eventos
+    const fechasOrdenadas = Object.keys(datosPorFecha).sort((a, b) => {
+      // Convertir la fecha de 'd/M/yyyy' a objetos Date para comparar
+      const [diaA, mesA, añoA] = a.split("/").map(Number);
+      const [diaB, mesB, añoB] = b.split("/").map(Number);
+      // Date toma meses de 0-11, por eso restamos 1
+      const fechaA = new Date(añoA, mesA - 1, diaA);
+      const fechaB = new Date(añoB, mesB - 1, diaB);
+
+      return fechaA.getTime() - fechaB.getTime();
+    });
+
+    setFechasOrdenadas(fechasOrdenadas);
     setFetched(true);
   };
 
+  console.log("fechas ordenadas: ", fechasOrdenadas);
+
   return (
     <div className="App">
-      <img src={require("./assets/thor.jpg")} />
-      {password != "saborcito" && (
+      <img src={require("./assets/thor.jpg")} alt="Thor" />
+      {password !== "saborcito" && (
         <input
           placeholder="Password?"
           style={{ textAlign: "center", marginTop: "10px" }}
@@ -58,18 +72,18 @@ const App = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
       )}
-      {!fetched && password == "saborcito" && <button onClick={fetchData}>Summon Thor's Insights</button>}
-      {Object.entries(datos).sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([dia, eventos]) => (
+      {!fetched && password === "saborcito" && <button onClick={fetchData}>Summon Thor's Insights</button>}
+      {fechasOrdenadas.map((dia) => (
         <div key={dia}>
           <h2>{dia}</h2>
-          {eventos.map((evento) => (
+          {datos[dia].map((evento) => (
             <div
               key={evento.id}
               style={{
                 color: evento.event === "connected" ? "green" : evento.event.includes("self") ? "yellow" : "red",
               }}
             >
-              {new Date(evento.timestamp).toLocaleTimeString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} -
+              {new Date(evento.timestamp).toLocaleTimeString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} -{" "}
               {evento.event} - {userNames[evento.userId] || "Nombre no encontrado"}
             </div>
           ))}
