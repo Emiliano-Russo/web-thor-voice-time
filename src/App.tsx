@@ -21,12 +21,16 @@ const userNames = {
 
 const organizarEventosPorFecha = (eventos: Evento[]) => {
   return eventos.reduce((acc, evento) => {
-    const fecha = new Date(evento.timestamp).toLocaleDateString();
-    if (!acc[fecha]) {
-      acc[fecha] = [];
+    // Obtener la fecha y el día de la semana
+    const fecha = new Date(evento.timestamp);
+    const fechaConDia = `${fecha.toLocaleDateString("es-AR", { weekday: "long" })}, ${fecha.toLocaleDateString(
+      "es-AR"
+    )}`;
+    if (!acc[fechaConDia]) {
+      acc[fechaConDia] = [];
     }
-    acc[fecha].push(evento);
-    acc[fecha].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    acc[fechaConDia].push(evento);
+    acc[fechaConDia].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     return acc;
   }, {} as Record<string, Evento[]>);
 };
@@ -44,10 +48,11 @@ const App = () => {
     setDatos(datosPorFecha);
     // Aquí ordenamos las fechas luego de organizar los eventos
     const fechasOrdenadas = Object.keys(datosPorFecha).sort((a, b) => {
-      // Convertir la fecha de 'd/M/yyyy' a objetos Date para comparar
-      const [diaA, mesA, añoA] = a.split("/").map(Number);
-      const [diaB, mesB, añoB] = b.split("/").map(Number);
-      // Date toma meses de 0-11, por eso restamos 1
+      // Extraer la parte de la fecha sin el día de la semana para comparar
+      const fechaAString = a.substring(a.indexOf(",") + 2);
+      const fechaBString = b.substring(b.indexOf(",") + 2);
+      const [diaA, mesA, añoA] = fechaAString.split("/").map(Number);
+      const [diaB, mesB, añoB] = fechaBString.split("/").map(Number);
       const fechaA = new Date(añoA, mesA - 1, diaA);
       const fechaB = new Date(añoB, mesB - 1, diaB);
 
@@ -75,6 +80,7 @@ const App = () => {
       {!fetched && password === "saborcito" && <button onClick={fetchData}>Summon Thor's Insights</button>}
       {fechasOrdenadas.map((dia) => (
         <div key={dia}>
+          {/* Aquí se muestra la fecha con el día de la semana incluido */}
           <h2>{dia}</h2>
           {datos[dia].map((evento) => (
             <div
