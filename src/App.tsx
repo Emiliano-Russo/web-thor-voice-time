@@ -7,6 +7,7 @@ interface Evento {
   timestamp: string;
   event: string;
   userId: string;
+  game?: string;
   // otros campos según necesites
 }
 
@@ -18,6 +19,38 @@ const userNames = {
   "625835283333775360": "Nalesh",
   "868627769465139312": "Jorge",
 };
+
+function eventoToColor(event: string) {
+  switch (event) {
+    case "connected":
+      return "green";
+      break;
+    case "disconnected":
+      return "#e32428";
+      break;
+    case "started-game":
+      return "#b3ecf1";
+      break;
+    case "end-game":
+      return "pink";
+      break;
+    case "online":
+      return "#3ded97";
+      break;
+    case "offline":
+      return "#680c07";
+      break;
+    case "self-muted":
+      return "yellow";
+      break;
+    case "self-unmuted":
+      return "yellow";
+      break;
+    default:
+      return "blue";
+      break;
+  }
+}
 
 const organizarEventosPorFecha = (eventos: Evento[]) => {
   return eventos.reduce((acc, evento) => {
@@ -35,11 +68,24 @@ const organizarEventosPorFecha = (eventos: Evento[]) => {
   }, {} as Record<string, Evento[]>);
 };
 
+const descargarComoJson = (datos, nombreArchivo) => {
+  const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(datos))}`;
+  const link = document.createElement("a");
+  link.href = jsonString;
+  link.download = `${nombreArchivo}.json`;
+
+  link.click();
+};
+
 const App = () => {
   const [datos, setDatos] = useState<Record<string, Evento[]>>({});
   const [fechasOrdenadas, setFechasOrdenadas] = useState<string[]>([]);
   const [fetched, setFetched] = useState(false);
   const [password, setPassword] = useState("");
+
+  const handleDescargarDatos = () => {
+    descargarComoJson(datos, "datos_voice_log");
+  };
 
   const fetchData = async () => {
     const querySnapshot = await getDocs(collection(db, "voice_log"));
@@ -68,6 +114,7 @@ const App = () => {
   return (
     <div className="App">
       <img src={require("./assets/thor.jpg")} alt="Thor" />
+      <button onClick={handleDescargarDatos}>Magic Download</button>
       {password !== "saborcito" && (
         <input
           placeholder="Password?"
@@ -86,11 +133,12 @@ const App = () => {
             <div
               key={evento.id}
               style={{
-                color: evento.event === "connected" ? "green" : evento.event.includes("self") ? "yellow" : "red",
+                color: eventoToColor(evento.event),
               }}
             >
               {new Date(evento.timestamp).toLocaleTimeString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} -{" "}
-              {evento.event} - {userNames[evento.userId] || "Nombre no encontrado"}
+              {evento.event}
+              {evento.game && "(" + evento.game + ")"} - {userNames[evento.userId] || "Nombre no encontrado"}
             </div>
           ))}
         </div>
