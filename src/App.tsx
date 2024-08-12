@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore"; // Importa Timestamp de firebase
 import db from "./firebaseConfig";
 
 interface Evento {
   id: string;
-  timestamp: string;
+  timestamp: Timestamp; // Cambiado a Timestamp de Firestore
   event: string;
   userId: string;
   game?: string;
@@ -24,38 +25,28 @@ function eventoToColor(event: string) {
   switch (event) {
     case "connected":
       return "green";
-      break;
     case "disconnected":
       return "#e32428";
-      break;
     case "started-game":
       return "#b3ecf1";
-      break;
     case "end-game":
       return "pink";
-      break;
     case "online":
       return "#3ded97";
-      break;
     case "offline":
       return "#680c07";
-      break;
     case "self-muted":
-      return "yellow";
-      break;
     case "self-unmuted":
       return "yellow";
-      break;
     default:
       return "blue";
-      break;
   }
 }
 
 const organizarEventosPorFecha = (eventos: Evento[]) => {
   return eventos.reduce((acc, evento) => {
-    // Obtener la fecha y el día de la semana
-    const fecha = new Date(evento.timestamp);
+    // Convertir el timestamp de Firestore a Date
+    const fecha = evento.timestamp.toDate();
     const fechaConDia = `${fecha.toLocaleDateString("es-AR", { weekday: "long" })}, ${fecha.toLocaleDateString(
       "es-AR"
     )}`;
@@ -63,7 +54,7 @@ const organizarEventosPorFecha = (eventos: Evento[]) => {
       acc[fechaConDia] = [];
     }
     acc[fechaConDia].push(evento);
-    acc[fechaConDia].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    acc[fechaConDia].sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
     return acc;
   }, {} as Record<string, Evento[]>);
 };
@@ -88,13 +79,39 @@ const App = () => {
   };
 
   const fetchData = async () => {
+    console.log("fetching data...");
     const querySnapshot = await getDocs(collection(db, "voice_log"));
     const eventos = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Evento[];
     const datosPorFecha = organizarEventosPorFecha(eventos);
     setDatos(datosPorFecha);
-    // Aquí ordenamos las fechas luego de organizar los eventos
     const fechasOrdenadas = Object.keys(datosPorFecha).sort((a, b) => {
-      // Extraer la parte de la fecha sin el día de la semana para comparar
+      const fechaAString = a.substring(a.indexOf(",") + 2);
+      const fechaBString = b.substring(b.indexOf(",") + 2);
+      const [diaA, mesA, añoA] = fechaAString.split("/").map(Number);
+      const [diaB, mesB, añoB] = fechaBString.split("/").map(Number);
+      const fechaA = new Date(añoA, mesA - 1, diaA);
+      const fechaB = new Date(añoB, mesB - 1, diaB);
+
+      return fechaA.getTime() - fechaB.getTime();
+    });
+
+    setFechasOrdenadas(fechasOrdenadas);
+    setFetched(true);
+  };
+
+  const fetchRecentData = async () => {
+    console.log("fetching recent data....");
+    const now = new Date();
+    const threeDaysAgo = new Date(now);
+    threeDaysAgo.setDate(now.getDate() - 3);
+
+    const q = query(collection(db, "voice_log"), where("timestamp", ">=", Timestamp.fromDate(threeDaysAgo)));
+
+    const querySnapshot = await getDocs(q);
+    const eventos = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Evento[];
+    const datosPorFecha = organizarEventosPorFecha(eventos);
+    setDatos(datosPorFecha);
+    const fechasOrdenadas = Object.keys(datosPorFecha).sort((a, b) => {
       const fechaAString = a.substring(a.indexOf(",") + 2);
       const fechaBString = b.substring(b.indexOf(",") + 2);
       const [diaA, mesA, añoA] = fechaAString.split("/").map(Number);
@@ -124,7 +141,12 @@ const App = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
       )}
-      {!fetched && password === "saborcito" && <button onClick={fetchData}>Summon Thor's Insights</button>}
+      {!fetched && password === "saborcito" && (
+        <>
+          <button onClick={fetchData}>Summon Thor's Insights</button>
+          <button onClick={fetchRecentData}>Recent Summon Thor's Insights</button>
+        </>
+      )}
       {fechasOrdenadas.map((dia) => (
         <div key={dia}>
           {/* Aquí se muestra la fecha con el día de la semana incluido */}
@@ -136,8 +158,10 @@ const App = () => {
                 color: eventoToColor(evento.event),
               }}
             >
-              {new Date(evento.timestamp).toLocaleTimeString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} -{" "}
-              {evento.event}
+              {evento.timestamp
+                .toDate()
+                .toLocaleTimeString("es-AR", { hour12: false, timeZone: "America/Argentina/Buenos_Aires" })}{" "}
+              - {evento.event}
               {evento.game && "(" + evento.game + ")"} - {userNames[evento.userId] || "Nombre no encontrado"}
             </div>
           ))}
