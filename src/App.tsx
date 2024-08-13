@@ -24,22 +24,22 @@ const userNames = {
 function eventoToColor(event: string) {
   switch (event) {
     case "connected":
-      return "green";
+      return "#00FF7F"; // Spring Green
     case "disconnected":
-      return "#e32428";
+      return "#FF4500"; // Orange Red
     case "started-game":
-      return "#b3ecf1";
+      return "#1E90FF"; // Dodger Blue
     case "end-game":
-      return "pink";
+      return "#FF69B4"; // Hot Pink
     case "online":
-      return "#3ded97";
+      return "#00BFFF"; // Deep Sky Blue
     case "offline":
-      return "#680c07";
+      return "#A52A2A"; // Brown
     case "self-muted":
     case "self-unmuted":
-      return "yellow";
+      return "#FFD700"; // Gold
     default:
-      return "blue";
+      return "#00CED1"; // Dark Turquoise
   }
 }
 
@@ -71,6 +71,7 @@ const descargarComoJson = (datos, nombreArchivo) => {
 const App = () => {
   const [datos, setDatos] = useState<Record<string, Evento[]>>({});
   const [fechasOrdenadas, setFechasOrdenadas] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para controlar el loading spinner
   const [fetched, setFetched] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -80,6 +81,7 @@ const App = () => {
 
   const fetchData = async () => {
     console.log("fetching data...");
+    setIsLoading(true); // Mostrar el spinner al iniciar la búsqueda de datos
     const querySnapshot = await getDocs(collection(db, "voice_log"));
     const eventos = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Evento[];
     const datosPorFecha = organizarEventosPorFecha(eventos);
@@ -97,10 +99,12 @@ const App = () => {
 
     setFechasOrdenadas(fechasOrdenadas);
     setFetched(true);
+    setIsLoading(false); // Ocultar el spinner cuando los datos estén cargados
   };
 
   const fetchRecentData = async () => {
     console.log("fetching recent data....");
+    setIsLoading(true); // Mostrar el spinner al iniciar la búsqueda de datos recientes
     const now = new Date();
     const threeDaysAgo = new Date(now);
     threeDaysAgo.setDate(now.getDate() - 3);
@@ -124,6 +128,7 @@ const App = () => {
 
     setFechasOrdenadas(fechasOrdenadas);
     setFetched(true);
+    setIsLoading(false); // Ocultar el spinner cuando los datos estén cargados
   };
 
   console.log("fechas ordenadas: ", fechasOrdenadas);
@@ -147,26 +152,30 @@ const App = () => {
           <button onClick={fetchRecentData}>Recent Summon Thor's Insights</button>
         </>
       )}
-      {fechasOrdenadas.map((dia) => (
-        <div key={dia}>
-          {/* Aquí se muestra la fecha con el día de la semana incluido */}
-          <h2>{dia}</h2>
-          {datos[dia].map((evento) => (
-            <div
-              key={evento.id}
-              style={{
-                color: eventoToColor(evento.event),
-              }}
-            >
-              {evento.timestamp
-                .toDate()
-                .toLocaleTimeString("es-AR", { hour12: false, timeZone: "America/Argentina/Buenos_Aires" })}{" "}
-              - {evento.event}
-              {evento.game && "(" + evento.game + ")"} - {userNames[evento.userId] || "Nombre no encontrado"}
-            </div>
-          ))}
-        </div>
-      ))}
+      {isLoading ? ( // Mostrar el spinner si isLoading es true
+        <div>Loading...</div>
+      ) : (
+        fechasOrdenadas.map((dia) => (
+          <div key={dia}>
+            {/* Aquí se muestra la fecha con el día de la semana incluido */}
+            <h2>{dia}</h2>
+            {datos[dia].map((evento) => (
+              <div
+                key={evento.id}
+                style={{
+                  color: eventoToColor(evento.event),
+                }}
+              >
+                {evento.timestamp
+                  .toDate()
+                  .toLocaleTimeString("es-AR", { hour12: false, timeZone: "America/Argentina/Buenos_Aires" })}{" "}
+                - {evento.event}
+                {evento.game && "(" + evento.game + ")"} - {userNames[evento.userId] || "Nombre no encontrado"}
+              </div>
+            ))}
+          </div>
+        ))
+      )}
     </div>
   );
 };
