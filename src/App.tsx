@@ -19,6 +19,7 @@ const userNames = {
   "523684629379547162": "Saborcito",
   "625835283333775360": "Nalesh",
   "868627769465139312": "Jorge",
+  "1300228593674223636":"Nalesh2"
 };
 
 function eventoToColor(event: string) {
