@@ -30,16 +30,19 @@ export const ConnectionLogs: React.FC = () => {
       <button onClick={() => navigate("/dashboard")}>⬅ Volver al Dashboard</button>
       <div style={{ margin: "0 auto", width: "70%", textAlign: "left" }}>
         {logs.length > 0 ? (
-          logs.map((log, index) => (
+          logs.reverse().map((log, index) => (
             <div key={index} style={{ border: "1px solid #ccc", padding: "10px", margin: "10px 0" }}>
               <p>
-                <strong>Usuario:</strong> {log.username}
+                <strong>Usuario:</strong> {log.userId}
+              </p>
+              <p>
+                <strong>Evento:</strong> {log.event}
               </p>
               <p>
                 <strong>Fecha:</strong> {new Date(log.timestamp).toLocaleString()}
               </p>
               <p>
-                <strong>Servidor:</strong> {log.guildName}
+                <strong>Servidor:</strong> {log.guildId}
               </p>
             </div>
           ))

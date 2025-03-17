@@ -53,8 +53,7 @@ export const Dashboard: React.FC = () => {
       {user ? (
         <div style={{ margin: "0 auto", width: "50%" }}>
           <h2>{user.username}</h2>
-          <p>ID: {user.id}</p>
-          <p>{user.ownedGuilds?.length} Servers</p>
+          <p>You have {user.ownedGuilds?.length} Servers</p>
           {user.ownedGuilds?.map((guild: any) => {
             const isBotInGuild = botGuilds.includes(guild.id);
             return (
@@ -62,20 +61,21 @@ export const Dashboard: React.FC = () => {
                 key={guild.id}
                 style={{
                   border: "1px solid #ccc",
+                  borderRadius: "10px",
                   padding: "10px",
                   margin: "10px 0",
-                  backgroundColor: isBotInGuild ? "#d4edda" : "#f8d7da",
+                  backgroundColor: isBotInGuild ? "green" : "#111666",
                 }}
               >
                 <h3>{guild.name}</h3>
                 <p>ID: {guild.id}</p>
-                <p>Bot {isBotInGuild ? "✅ Presente" : "❌ No está"}</p>
+                <p>Bot {isBotInGuild ? "✅ Present" : "❌"}</p>
                 {isBotInGuild && (
                   <button
                     onClick={() => navigate(`/connection-logs/${guild.id}`)}
                     style={{ marginTop: "20px", padding: "10px 20px" }}
                   >
-                    Ver registros de conexión
+                    Ver registros de conexión ultimos 7 días
                   </button>
                 )}
               </div>
