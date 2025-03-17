@@ -70,6 +70,14 @@ export const Dashboard: React.FC = () => {
                 <h3>{guild.name}</h3>
                 <p>ID: {guild.id}</p>
                 <p>Bot {isBotInGuild ? "✅ Presente" : "❌ No está"}</p>
+                {isBotInGuild && (
+                  <button
+                    onClick={() => navigate(`/connection-logs/${guild.id}`)}
+                    style={{ marginTop: "20px", padding: "10px 20px" }}
+                  >
+                    Ver registros de conexión
+                  </button>
+                )}
               </div>
             );
           })}
