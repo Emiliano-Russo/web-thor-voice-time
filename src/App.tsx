@@ -6,6 +6,14 @@ import { ConnectionLogs } from "./screens/ConnectionLogs";
 import { GuildDashboard } from "./screens/GuildDashboard";
 
 const App: React.FC = () => {
+interface Evento {
+  id: string;
+  timestamp: Timestamp; // Cambiado a Timestamp de Firestore
+  event: string;
+  userId: string;
+  game?: string;
+}
+  // otros campos según necesites
   return (
     <Router>
       <Routes>
