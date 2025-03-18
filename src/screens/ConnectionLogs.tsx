@@ -8,17 +8,9 @@ interface LogEntry {
   timestamp: string;
   event: string;
   userId: string;
+  username: string; // Ahora recibimos esto desde el backend
   guildId: string;
 }
-
-const userNames: Record<string, string> = {
-  "301206456185913346": "Altoemilius",
-  "339950447810969612": "fabimontans",
-  "588152515946872883": "DiegoPlusUltra",
-  "523684629379547162": "Saborcito",
-  "625835283333775360": "Nalesh",
-  "868627769465139312": "Jorge",
-};
 
 const eventoToColor = (event: string) => {
   switch (event) {
@@ -63,6 +55,7 @@ const organizarEventosPorFecha = (eventos: LogEntry[]) => {
 
 export const ConnectionLogs: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [logsOrganizados, setLogsOrganizados] = useState<Record<string, LogEntry[]>>({});
   const navigate = useNavigate();
   const { guildId } = useParams();
@@ -82,13 +75,18 @@ export const ConnectionLogs: React.FC = () => {
         setLogs(data.logs);
         setLogsOrganizados(organizarEventosPorFecha(data.logs));
       })
-      .catch((err) => console.error("Error obteniendo logs:", err));
+      .catch((err) => console.error("Error obteniendo logs:", err))
+      .finally(() => setLoading(false));
   }, [navigate, guildId]);
+
+  if (loading) {
+    return <h1 style={{ textAlign: "center" }}>Loading...</h1>;
+  }
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Registro de Conexiones - Servidor {guildId}</h1>
-      <button onClick={() => navigate("/dashboard")}>⬅ Volver al Dashboard</button>
+      <h1>Connection Logs - Server {guildId}</h1>
+      <button onClick={() => navigate("/dashboard")}>⬅ Back to Dashboard</button>
       <div style={{ margin: "0 auto", width: "70%", textAlign: "center" }}>
         {Object.keys(logsOrganizados).length > 0 ? (
           Object.keys(logsOrganizados).map((fecha) => (
@@ -106,13 +104,13 @@ export const ConnectionLogs: React.FC = () => {
                     hour12: false,
                     timeZone: "America/Argentina/Buenos_Aires",
                   })}{" "}
-                  - {log.event} - {userNames[log.userId] || log.userId}
+                  - {log.event} - {log.username || log.userId} {/* 🔹 Usa el nombre de usuario del backend */}
                 </div>
               ))}
             </div>
           ))
         ) : (
-          <p>No hay registros de conexión para este servidor.</p>
+          <p>No connection logs available for this server.</p>
         )}
       </div>
     </div>
