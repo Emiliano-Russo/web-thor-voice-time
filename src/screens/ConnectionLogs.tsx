@@ -89,26 +89,28 @@ export const ConnectionLogs: React.FC = () => {
       <button onClick={() => navigate("/dashboard")}>⬅ Back to Dashboard</button>
       <div style={{ margin: "0 auto", width: "70%", textAlign: "center" }}>
         {Object.keys(logsOrganizados).length > 0 ? (
-          Object.keys(logsOrganizados).map((fecha) => (
-            <div key={fecha}>
-              <h2>{fecha}</h2>
-              {logsOrganizados[fecha].map((log) => (
-                <div
-                  key={log.id}
-                  style={{
-                    color: eventoToColor(log.event),
-                    padding: "5px 0",
-                  }}
-                >
-                  {new Date(log.timestamp).toLocaleTimeString("es-AR", {
-                    hour12: false,
-                    timeZone: "America/Argentina/Buenos_Aires",
-                  })}{" "}
-                  - {log.event} - {log.username || log.userId} {/* 🔹 Usa el nombre de usuario del backend */}
-                </div>
-              ))}
-            </div>
-          ))
+          Object.keys(logsOrganizados)
+            .reverse()
+            .map((fecha) => (
+              <div key={fecha}>
+                <h2>{fecha}</h2>
+                {logsOrganizados[fecha].map((log) => (
+                  <div
+                    key={log.id}
+                    style={{
+                      color: eventoToColor(log.event),
+                      padding: "5px 0",
+                    }}
+                  >
+                    {new Date(log.timestamp).toLocaleTimeString("es-AR", {
+                      hour12: false,
+                      timeZone: "America/Argentina/Buenos_Aires",
+                    })}{" "}
+                    - {log.event} - {log.username || log.userId} {/* 🔹 Usa el nombre de usuario del backend */}
+                  </div>
+                ))}
+              </div>
+            ))
         ) : (
           <p>No connection logs available for this server.</p>
         )}
