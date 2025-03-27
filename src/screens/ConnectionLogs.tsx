@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Header } from "../components/Header";
 
 const backendUri = process.env.REACT_APP_BACKEND_URI;
 
@@ -84,9 +85,10 @@ export const ConnectionLogs: React.FC = () => {
   }
 
   return (
+    <>
+    <Header/>
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Connection Logs - Server {guildId}</h1>
-      <button onClick={() => navigate("/dashboard")}>⬅ Back to Dashboard</button>
+      <h1>Connection Logs</h1>
       <div style={{ margin: "0 auto", width: "70%", textAlign: "center" }}>
         {Object.keys(logsOrganizados).length > 0 ? (
           Object.keys(logsOrganizados)
@@ -116,5 +118,6 @@ export const ConnectionLogs: React.FC = () => {
         )}
       </div>
     </div>
+    </>
   );
 };

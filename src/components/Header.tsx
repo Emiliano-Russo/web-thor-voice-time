@@ -11,7 +11,15 @@ export const Header: React.FC = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer}>
+      <div
+        style={{ ...styles.logoContainer, cursor: "pointer" }}
+        onClick={() => navigate("/dashboard")}
+        role="button"
+        tabIndex={0}
+        onKeyPress={(e) => {
+          if (e.key === "Enter" || e.key === " ") navigate("/dashboard");
+        }}
+      >
         <img src="/thor.png" alt="Thor Voice Time" style={styles.logo} />
         <h1 style={styles.title}>Thor Voice Time</h1>
       </div>

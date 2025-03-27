@@ -4,6 +4,7 @@ import { Login } from "./screens/Login";
 import { Dashboard } from "./screens/Dashboard";
 import { ConnectionLogs } from "./screens/ConnectionLogs";
 import { GuildDashboard } from "./screens/GuildDashboard";
+import { AnalyticsChart } from "./screens/AnalyticsChart";
 
 const App: React.FC = () => {
   // otros campos según necesites
@@ -14,6 +15,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:guildId" element={<GuildDashboard />} />
         <Route path="/connection-logs/:guildId" element={<ConnectionLogs />} />
+        <Route path="/analytics/:guildId" element={<AnalyticsChart />} />
       </Routes>
     </Router>
   );

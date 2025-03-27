@@ -40,3 +40,32 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
+input {
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  outline: none;
+  font-size: 16px;
+  color: #333;
+}
+
+input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 91, 179, 0.5);
+}
+
+select {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  border: 1px solid #0056b3;
+  border-radius: 5px;
+  padding: 2px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #003f7f;
+  box-shadow: 0 0 5px rgba(0, 63, 127, 0.5);
+}
